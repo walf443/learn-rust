@@ -1,5 +1,5 @@
 use tokio::io;
-use tokio::net::{TcpListener};
+use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -9,7 +9,7 @@ async fn main() -> io::Result<()> {
         let (mut socket, _) = listener.accept().await?;
 
         tokio::spawn(async move {
-            let (mut reader, mut writer) = io::split(socket);
+            let (mut reader, mut writer) = socket.split();
             if io::copy(&mut reader, &mut writer).await.is_err() {
                 eprintln!("failed to copy");
             }
