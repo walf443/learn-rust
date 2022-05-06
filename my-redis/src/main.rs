@@ -1,9 +1,9 @@
 use bytes::Bytes;
+use dashmap::DashMap;
 use mini_redis::Command::Set;
 use mini_redis::{Command, Connection, Frame};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use dashmap::DashMap;
 use tokio::net::{TcpListener, TcpStream};
 
 type Db = Arc<DashMap<String, Bytes>>;
