@@ -104,10 +104,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "dashmap"
+version = "5.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "391b56fbd302e585b7a9494fb70e40949567b1cf9003a8e4a6041a1687c26573"
+dependencies = [
+ "cfg-if",
+ "hashbrown",
+ "lock_api",
+]
+
+[[package]]
 name = "futures-core"
 version = "0.3.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c09fd04b7e4073ac7156a9539b57a484a8ea920f79c7c675d05d289ab6110d3"
+
+[[package]]
+name = "hashbrown"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "db0d4cf898abf0081f964436dc980e96670a0f36863e4b83aaacdb65c9d7ccc3"
 
 [[package]]
 name = "heck"
@@ -228,6 +245,7 @@ name = "my-redis"
 version = "0.1.0"
 dependencies = [
  "bytes",
+ "dashmap",
  "mini-redis",
  "tokio",
 ]
