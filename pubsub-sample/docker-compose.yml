@@ -1,0 +1,10 @@
+version: '3'
+services:
+  pubsub:
+    image: 'gcr.io/google.com/cloudsdktool/cloud-sdk:latest'
+    container_name: pubsub_sample
+    ports:
+      - "8085:8085"
+    volumes:
+      - ../pubsub_data:/pubsub_data
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085 --data-dir=/pubsub_data
