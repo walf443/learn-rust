@@ -1,5 +1,5 @@
 [workspace]
-members = ["my-redis", "pubsub-sample", "union-find"]
+members = ["my-redis", "pubsub-sample", "union-find", "json"]
 
 [package]
 name = "learn-rust"
