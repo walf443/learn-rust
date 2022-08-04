@@ -1,6 +1,10 @@
 [workspace]
-members = ["my-redis", "pubsub-sample"]
+members = ["my-redis", "pubsub-sample", "union-find"]
 
 [package]
 name = "learn-rust"
 version = "0.0.1"
+
+[[bin]]
+name = "stdin_lines"
+path = "src/stdin_lines.rs"
