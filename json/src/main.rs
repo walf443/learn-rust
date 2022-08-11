@@ -1,4 +1,6 @@
-use anyhow::{bail, Result};
+extern crate core;
+
+use anyhow::{anyhow, Result};
 use std::fmt::Error;
 use std::iter::Map;
 
@@ -10,7 +12,7 @@ fn main() -> Result<()> {
 }
 
 #[derive(Debug)]
-enum JSONValue {
+pub enum JSONValue {
     Object(Box<Map<String, JSONValue>>),
     Array(Box<Vec<JSONValue>>),
     String(String),
@@ -57,15 +59,15 @@ impl TryInto<bool> for JSONValue {
     }
 }
 
-fn parse_json(input: &str) -> Result<JSONValue> {
-    if input == "null" {
-        return Ok(JSONValue::Null);
-    }
-    if input == "true" {
-        return Ok(JSONValue::Bool(true));
-    }
-    if input == "false" {
-        return Ok(JSONValue::Bool(false));
+pub fn parse_json(input: &str) -> Result<JSONValue> {
+    let mut iter = input.chars().peekable();
+    let cursor = iter.next().unwrap();
+    match cursor {
+        'n' => return parse_json_null(iter),
+        't' => return parse_json_true(iter),
+        'f' => return parse_json_false(iter),
+        '"' => return parse_json_string(iter),
+        _ => {}
     }
     let str = JSONValue::String("foo".to_string());
     let num = JSONValue::Number(2);
@@ -73,6 +75,72 @@ fn parse_json(input: &str) -> Result<JSONValue> {
 
     let ary = JSONValue::Array(Box::new(ary));
     Ok(ary)
+}
+
+fn parse_json_null<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let char_u = iter.next().unwrap();
+    if char_u != 'u' {
+        return Err(anyhow!("unknown char: {}", char_u));
+    }
+
+    let char_l = iter.next().unwrap();
+    if char_l != 'l' {
+        return Err(anyhow!("unknown char: {}", char_l));
+    }
+
+    let char_u = iter.next().unwrap();
+    if char_u != 'l' {
+        return Err(anyhow!("unknown char: {}", char_u));
+    }
+
+    Ok(JSONValue::Null)
+}
+
+fn parse_json_true<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let char_r = iter.next().unwrap();
+    if char_r != 'r' {
+        return Err(anyhow!("unknown char: {}", char_r));
+    }
+
+    let char_u = iter.next().unwrap();
+    if char_u != 'u' {
+        return Err(anyhow!("unknown char: {}", char_u));
+    }
+
+    let char_e = iter.next().unwrap();
+    if char_e != 'e' {
+        return Err(anyhow!("unknown char: {}", char_e));
+    }
+
+    Ok(JSONValue::Bool(true))
+}
+
+fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let char_a = iter.next().unwrap();
+    if char_a != 'a' {
+        return Err(anyhow!("unknown char: {}", char_a));
+    }
+
+    let char_l = iter.next().unwrap();
+    if char_l != 'l' {
+        return Err(anyhow!("unknown char: {}", char_l));
+    }
+
+    let char_s = iter.next().unwrap();
+    if char_s != 's' {
+        return Err(anyhow!("unknown char: {}", char_s));
+    }
+
+    let char_e = iter.next().unwrap();
+    if char_e != 'e' {
+        return Err(anyhow!("unknown char: {}", char_e));
+    }
+
+    Ok(JSONValue::Bool(false))
+}
+
+fn parse_json_string<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    Ok(JSONValue::String("".to_string()))
 }
 
 #[test]
