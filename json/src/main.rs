@@ -1,7 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::fmt::Error;
 use std::iter::Map;
-use std::ops::Add;
 
 fn main() -> Result<()> {
     let ary = parse_json("[\"foo\", 2]")?;
@@ -47,6 +45,17 @@ impl TryInto<i64> for JSONValue {
     }
 }
 
+impl TryInto<String> for JSONValue {
+    type Error = anyhow::Error;
+
+    fn try_into(self) -> std::result::Result<String, Self::Error> {
+        match self {
+            JSONValue::String(str) => Ok(str),
+            _ => Err(anyhow::anyhow!("not string")),
+        }
+    }
+}
+
 impl TryInto<bool> for JSONValue {
     type Error = anyhow::Error;
 
@@ -66,7 +75,7 @@ pub fn parse_json(input: &str) -> Result<JSONValue> {
         't' => return parse_json_true(iter),
         'f' => return parse_json_false(iter),
         '"' => return parse_json_string(iter),
-        '0' => return parse_json_number(iter),
+        '0'..='9' => return parse_json_number(iter),
         _ => {}
     }
     let str = JSONValue::String("foo".to_string());
@@ -156,7 +165,9 @@ fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> 
 
 fn parse_json_number<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
     let mut str = String::new();
-    while let char = iter.next() {
+    loop {
+        let char = iter.next();
+
         match char {
             None => break,
             Some(char) => {
@@ -171,7 +182,9 @@ fn parse_json_number<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue>
 }
 
 fn parse_json_string<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    Ok(JSONValue::String("".to_string()))
+    let _ = iter.next().unwrap();
+    let result: String = iter.take_while(|s| *s != '"').collect();
+    Ok(JSONValue::String(result))
 }
 
 #[test]
@@ -205,6 +218,24 @@ fn test_parse_number_success() -> anyhow::Result<()> {
     let result = parse_json("0")?;
     let num: i64 = result.try_into()?;
     assert_eq!(num, 0);
+
+    Ok(())
+}
+
+#[test]
+fn test_parse_number_success2() -> anyhow::Result<()> {
+    let result = parse_json("999")?;
+    let num: i64 = result.try_into()?;
+    assert_eq!(num, 999);
+
+    Ok(())
+}
+
+#[test]
+fn test_parse_string_success2() -> anyhow::Result<()> {
+    let result = parse_json("\"hoge\"")?;
+    let str: String = result.try_into()?;
+    assert_eq!(str, "hoge");
 
     Ok(())
 }
