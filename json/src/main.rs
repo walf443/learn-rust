@@ -1,8 +1,7 @@
-extern crate core;
-
 use anyhow::{anyhow, Result};
 use std::fmt::Error;
 use std::iter::Map;
+use std::ops::Add;
 
 fn main() -> Result<()> {
     let ary = parse_json("[\"foo\", 2]")?;
@@ -61,12 +60,13 @@ impl TryInto<bool> for JSONValue {
 
 pub fn parse_json(input: &str) -> Result<JSONValue> {
     let mut iter = input.chars().peekable();
-    let cursor = iter.next().unwrap();
+    let cursor = iter.peek().unwrap();
     match cursor {
         'n' => return parse_json_null(iter),
         't' => return parse_json_true(iter),
         'f' => return parse_json_false(iter),
         '"' => return parse_json_string(iter),
+        '0' => return parse_json_number(iter),
         _ => {}
     }
     let str = JSONValue::String("foo".to_string());
@@ -78,6 +78,11 @@ pub fn parse_json(input: &str) -> Result<JSONValue> {
 }
 
 fn parse_json_null<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let char_n = iter.next().unwrap();
+    if char_n != 'n' {
+        return Err(anyhow!("unknown char: {}", char_n));
+    }
+
     let char_u = iter.next().unwrap();
     if char_u != 'u' {
         return Err(anyhow!("unknown char: {}", char_u));
@@ -97,6 +102,11 @@ fn parse_json_null<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
 }
 
 fn parse_json_true<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let char_t = iter.next().unwrap();
+    if char_t != 't' {
+        return Err(anyhow!("unknown char: {}", char_t));
+    }
+
     let char_r = iter.next().unwrap();
     if char_r != 'r' {
         return Err(anyhow!("unknown char: {}", char_r));
@@ -116,6 +126,11 @@ fn parse_json_true<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
 }
 
 fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let char_f = iter.next().unwrap();
+    if char_f != 'f' {
+        return Err(anyhow!("unknown char: {}", char_f));
+    }
+
     let char_a = iter.next().unwrap();
     if char_a != 'a' {
         return Err(anyhow!("unknown char: {}", char_a));
@@ -137,6 +152,22 @@ fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> 
     }
 
     Ok(JSONValue::Bool(false))
+}
+
+fn parse_json_number<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
+    let mut str = String::new();
+    while let char = iter.next() {
+        match char {
+            None => break,
+            Some(char) => {
+                str.push(char);
+            }
+        }
+    }
+
+    let num = str.parse()?;
+
+    Ok(JSONValue::Number(num))
 }
 
 fn parse_json_string<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
