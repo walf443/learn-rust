@@ -87,77 +87,33 @@ pub fn parse_json(input: &str) -> Result<JSONValue> {
 }
 
 fn parse_json_null<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    let char_n = iter.next().unwrap();
-    if char_n != 'n' {
-        return Err(anyhow!("unknown char: {}", char_n));
-    }
-
-    let char_u = iter.next().unwrap();
-    if char_u != 'u' {
-        return Err(anyhow!("unknown char: {}", char_u));
-    }
-
-    let char_l = iter.next().unwrap();
-    if char_l != 'l' {
-        return Err(anyhow!("unknown char: {}", char_l));
-    }
-
-    let char_u = iter.next().unwrap();
-    if char_u != 'l' {
-        return Err(anyhow!("unknown char: {}", char_u));
+    for i in ['n', 'u', 'l', 'l'] {
+        let ch = iter.next().unwrap();
+        if ch != i {
+            return Err(anyhow!("unknown char: '{}', expected: '{}'", ch, i));
+        }
     }
 
     Ok(JSONValue::Null)
 }
 
 fn parse_json_true<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    let char_t = iter.next().unwrap();
-    if char_t != 't' {
-        return Err(anyhow!("unknown char: {}", char_t));
-    }
-
-    let char_r = iter.next().unwrap();
-    if char_r != 'r' {
-        return Err(anyhow!("unknown char: {}", char_r));
-    }
-
-    let char_u = iter.next().unwrap();
-    if char_u != 'u' {
-        return Err(anyhow!("unknown char: {}", char_u));
-    }
-
-    let char_e = iter.next().unwrap();
-    if char_e != 'e' {
-        return Err(anyhow!("unknown char: {}", char_e));
+    for i in ['t', 'r', 'u', 'e'] {
+        let ch = iter.next().unwrap();
+        if ch != i {
+            return Err(anyhow!("unknown char: '{}', expected: '{}'", ch, i));
+        }
     }
 
     Ok(JSONValue::Bool(true))
 }
 
 fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    let char_f = iter.next().unwrap();
-    if char_f != 'f' {
-        return Err(anyhow!("unknown char: {}", char_f));
-    }
-
-    let char_a = iter.next().unwrap();
-    if char_a != 'a' {
-        return Err(anyhow!("unknown char: {}", char_a));
-    }
-
-    let char_l = iter.next().unwrap();
-    if char_l != 'l' {
-        return Err(anyhow!("unknown char: {}", char_l));
-    }
-
-    let char_s = iter.next().unwrap();
-    if char_s != 's' {
-        return Err(anyhow!("unknown char: {}", char_s));
-    }
-
-    let char_e = iter.next().unwrap();
-    if char_e != 'e' {
-        return Err(anyhow!("unknown char: {}", char_e));
+    for i in ['f', 'a', 'l', 's', 'e'] {
+        let ch = iter.next().unwrap();
+        if ch != i {
+            return Err(anyhow!("unknown char: '{}', expected: '{}'", ch, i));
+        }
     }
 
     Ok(JSONValue::Bool(false))
