@@ -13,7 +13,7 @@ pub enum JSONValue {
     Object(Box<Map<String, JSONValue>>),
     Array(Box<Vec<JSONValue>>),
     String(String),
-    Number(i64),
+    Number(f64),
     Bool(bool),
     Null,
 }
@@ -34,10 +34,10 @@ impl JSONValue {
     }
 }
 
-impl TryInto<i64> for JSONValue {
+impl TryInto<f64> for JSONValue {
     type Error = anyhow::Error;
 
-    fn try_into(self) -> std::result::Result<i64, Self::Error> {
+    fn try_into(self) -> std::result::Result<f64, Self::Error> {
         match self {
             JSONValue::Number(num) => Ok(num),
             _ => Err(anyhow::anyhow!("not number")),
@@ -78,9 +78,7 @@ pub fn parse_json(input: &str) -> Result<JSONValue> {
         '0'..='9' => return parse_json_number(iter),
         _ => {}
     }
-    let str = JSONValue::String("foo".to_string());
-    let num = JSONValue::Number(2);
-    let ary = vec![str, num];
+    let ary = vec![];
 
     let ary = JSONValue::Array(Box::new(ary));
     Ok(ary)
@@ -172,8 +170,8 @@ fn test_parse_false_success() -> anyhow::Result<()> {
 #[test]
 fn test_parse_number_success() -> anyhow::Result<()> {
     let result = parse_json("0")?;
-    let num: i64 = result.try_into()?;
-    assert_eq!(num, 0);
+    let num: f64 = result.try_into()?;
+    assert_eq!(num, 0.0);
 
     Ok(())
 }
@@ -181,8 +179,17 @@ fn test_parse_number_success() -> anyhow::Result<()> {
 #[test]
 fn test_parse_number_success2() -> anyhow::Result<()> {
     let result = parse_json("999")?;
-    let num: i64 = result.try_into()?;
-    assert_eq!(num, 999);
+    let num: f64 = result.try_into()?;
+    assert_eq!(num, 999.0);
+
+    Ok(())
+}
+
+#[test]
+fn test_parse_number_float() -> anyhow::Result<()> {
+    let result = parse_json("3.14")?;
+    let num: f64 = result.try_into()?;
+    assert_eq!(num, 3.14);
 
     Ok(())
 }
