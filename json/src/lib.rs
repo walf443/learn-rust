@@ -1,5 +1,6 @@
 mod types;
 
+use crate::types::boolean::{parse_json_false, parse_json_true};
 use crate::types::number::parse_json_number;
 use anyhow::{anyhow, Result};
 use std::iter::Map;
@@ -91,28 +92,6 @@ fn parse_json_null<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
     Ok(JSONValue::Null)
 }
 
-fn parse_json_true<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    for i in ['t', 'r', 'u', 'e'] {
-        let ch = iter.next().unwrap();
-        if ch != i {
-            return Err(anyhow!("unknown char: '{}', expected: '{}'", ch, i));
-        }
-    }
-
-    Ok(JSONValue::Bool(true))
-}
-
-fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    for i in ['f', 'a', 'l', 's', 'e'] {
-        let ch = iter.next().unwrap();
-        if ch != i {
-            return Err(anyhow!("unknown char: '{}', expected: '{}'", ch, i));
-        }
-    }
-
-    Ok(JSONValue::Bool(false))
-}
-
 fn parse_json_string<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
     let _ = iter.next().unwrap();
     let result: String = iter.take_while(|s| *s != '"').collect();
@@ -123,24 +102,6 @@ fn parse_json_string<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue>
 fn test_parse_null_success() -> anyhow::Result<()> {
     let result = parse_json("null")?;
     assert!(result.is_null());
-
-    Ok(())
-}
-
-#[test]
-fn test_parse_true_success() -> anyhow::Result<()> {
-    let result = parse_json("true")?;
-    let boolean: bool = result.try_into()?;
-    assert_eq!(boolean, true);
-
-    Ok(())
-}
-
-#[test]
-fn test_parse_false_success() -> anyhow::Result<()> {
-    let result = parse_json("false")?;
-    let boolean: bool = result.try_into()?;
-    assert_eq!(boolean, false);
 
     Ok(())
 }
