@@ -1,3 +1,6 @@
+mod types;
+
+use crate::types::number::parse_json_number;
 use anyhow::{anyhow, Result};
 use std::iter::Map;
 
@@ -110,24 +113,6 @@ fn parse_json_false<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> 
     Ok(JSONValue::Bool(false))
 }
 
-fn parse_json_number<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
-    let mut str = String::new();
-    loop {
-        let char = iter.next();
-
-        match char {
-            None => break,
-            Some(char) => {
-                str.push(char);
-            }
-        }
-    }
-
-    let num = str.parse()?;
-
-    Ok(JSONValue::Number(num))
-}
-
 fn parse_json_string<I: Iterator<Item = char>>(mut iter: I) -> Result<JSONValue> {
     let _ = iter.next().unwrap();
     let result: String = iter.take_while(|s| *s != '"').collect();
@@ -156,33 +141,6 @@ fn test_parse_false_success() -> anyhow::Result<()> {
     let result = parse_json("false")?;
     let boolean: bool = result.try_into()?;
     assert_eq!(boolean, false);
-
-    Ok(())
-}
-
-#[test]
-fn test_parse_number_success() -> anyhow::Result<()> {
-    let result = parse_json("0")?;
-    let num: f64 = result.try_into()?;
-    assert_eq!(num, 0.0);
-
-    Ok(())
-}
-
-#[test]
-fn test_parse_number_success2() -> anyhow::Result<()> {
-    let result = parse_json("999")?;
-    let num: f64 = result.try_into()?;
-    assert_eq!(num, 999.0);
-
-    Ok(())
-}
-
-#[test]
-fn test_parse_number_float() -> anyhow::Result<()> {
-    let result = parse_json("3.14")?;
-    let num: f64 = result.try_into()?;
-    assert_eq!(num, 3.14);
 
     Ok(())
 }
